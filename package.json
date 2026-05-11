@@ -1,0 +1,61 @@
+{
+  "name": "n8n-nodes-vokaai",
+  "version": "0.1.0",
+  "description": "n8n community node for Voka AI — trigger workflows on call events (completed, insight received, transcript ready), pull call details and transcripts, and place outbound AI assistant calls.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "vokaai",
+    "voice-ai",
+    "ai-assistant",
+    "voice-agent"
+  ],
+  "license": "MIT",
+  "homepage": "https://docs.vokaai.com/docs/api/intro",
+  "author": {
+    "name": "Voka AI",
+    "url": "https://vokaai.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edryan04/n8n-nodes-vokaai.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/VokaaiApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Vokaai/Vokaai.node.js",
+      "dist/nodes/VokaaiTrigger/VokaaiTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.0",
+    "gulp": "^4.0.2",
+    "n8n-workflow": "*",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=20.15"
+  }
+}
