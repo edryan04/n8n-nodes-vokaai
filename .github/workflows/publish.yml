@@ -1,0 +1,45 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  # Manual trigger for re-publishing if a tag-driven run fails partway
+  workflow_dispatch:
+
+permissions:
+  # Required for npm publish --provenance to mint a Sigstore attestation
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    name: Build + Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.15'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint (prepublish profile)
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public
+        env:
+          # An npm automation token with publish access; add via:
+          #   GitHub repo → Settings → Secrets and variables → Actions → New
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

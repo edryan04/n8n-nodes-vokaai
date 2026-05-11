@@ -1,0 +1,34 @@
+version: 2
+updates:
+  # Production + dev dependencies via npm
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+    open-pull-requests-limit: 5
+    groups:
+      typescript-and-lint:
+        patterns:
+          - 'typescript'
+          - '@typescript-eslint/*'
+          - 'eslint'
+          - 'eslint-plugin-*'
+          - 'prettier'
+      n8n-platform:
+        patterns:
+          - 'n8n-workflow'
+    labels:
+      - 'dependencies'
+
+  # GitHub Actions versions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+    labels:
+      - 'dependencies'
+      - 'github-actions'

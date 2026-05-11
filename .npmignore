@@ -1,0 +1,17 @@
+.github/
+.vscode/
+.idea/
+node_modules/
+src/
+nodes/
+credentials/
+*.ts
+!dist/**/*.d.ts
+tsconfig.json
+.eslintrc.js
+.eslintrc.prepublish.js
+gulpfile.js
+.prettierrc.js
+.gitignore
+.editorconfig
+*.log
