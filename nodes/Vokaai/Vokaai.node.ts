@@ -176,7 +176,24 @@ export class Vokaai implements INodeType {
 				displayOptions: {
 					show: { resource: ['call'], operation: ['list'] },
 				},
+				// n8n's linter requires collection items alphabetized by `name`.
 				options: [
+					{
+						displayName: 'Assistant ID',
+						name: 'assistantId',
+						type: 'string',
+						default: '',
+						description: 'UUID of the assistant to filter by',
+						routing: { send: { type: 'query', property: 'assistant_id' } },
+					},
+					{
+						displayName: 'Cursor',
+						name: 'cursor',
+						type: 'string',
+						default: '',
+						description: 'Pagination cursor from a previous response',
+						routing: { send: { type: 'query', property: 'cursor' } },
+					},
 					{
 						displayName: 'Direction',
 						name: 'direction',
@@ -189,14 +206,6 @@ export class Vokaai implements INodeType {
 						routing: { send: { type: 'query', property: 'direction' } },
 					},
 					{
-						displayName: 'Assistant ID',
-						name: 'assistantId',
-						type: 'string',
-						default: '',
-						description: 'UUID of the assistant to filter by',
-						routing: { send: { type: 'query', property: 'assistant_id' } },
-					},
-					{
 						displayName: 'From (ISO 8601)',
 						name: 'from',
 						type: 'string',
@@ -206,6 +215,15 @@ export class Vokaai implements INodeType {
 						routing: { send: { type: 'query', property: 'from' } },
 					},
 					{
+						displayName: 'Limit',
+						name: 'limit',
+						type: 'number',
+						typeOptions: { minValue: 1 },
+						default: 50,
+						description: 'Max number of results to return',
+						routing: { send: { type: 'query', property: 'limit' } },
+					},
+					{
 						displayName: 'To (ISO 8601)',
 						name: 'to',
 						type: 'string',
@@ -213,23 +231,6 @@ export class Vokaai implements INodeType {
 						placeholder: '2026-05-31T23:59:59Z',
 						description: 'Inclusive upper bound on started_at',
 						routing: { send: { type: 'query', property: 'to' } },
-					},
-					{
-						displayName: 'Limit',
-						name: 'limit',
-						type: 'number',
-						typeOptions: { minValue: 1, maxValue: 100 },
-						default: 25,
-						description: 'Max results per page (1-100)',
-						routing: { send: { type: 'query', property: 'limit' } },
-					},
-					{
-						displayName: 'Cursor',
-						name: 'cursor',
-						type: 'string',
-						default: '',
-						description: 'Pagination cursor from a previous response',
-						routing: { send: { type: 'query', property: 'cursor' } },
 					},
 				],
 			},

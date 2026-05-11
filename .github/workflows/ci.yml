@@ -30,7 +30,13 @@ jobs:
           cache: 'npm'
 
       - name: Install
-        run: npm ci
+        # --ignore-scripts skips native compilation of `isolated-vm`, a
+        # transitive dep of `n8n-workflow`. We only need the n8n-workflow
+        # TYPES at build/lint time; the runtime isolated-vm binary is
+        # provided by n8n at runtime, not by us. Skipping scripts shaves
+        # ~2 min off the install AND avoids the v8 API mismatch that
+        # breaks isolated-vm's gyp build against newer Node minor versions.
+        run: npm ci --ignore-scripts
 
       - name: Lint
         run: npm run lint

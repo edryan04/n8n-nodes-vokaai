@@ -29,7 +29,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install
-        run: npm ci
+        # See ci.yml — skip native compile of isolated-vm; only types needed.
+        run: npm ci --ignore-scripts
 
       - name: Lint (prepublish profile)
         run: npm run lint
