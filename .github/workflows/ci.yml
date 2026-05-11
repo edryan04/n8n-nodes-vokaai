@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs for the same PR / branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Lint + Build + Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.15'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck + Build
+        run: npm run build
+
+      - name: Verify dist artifacts
+        run: |
+          test -f dist/credentials/VokaaiApi.credentials.js
+          test -f dist/nodes/Vokaai/Vokaai.node.js
+          test -f dist/nodes/Vokaai/vokaai.svg
+          test -f dist/nodes/VokaaiTrigger/VokaaiTrigger.node.js
+          test -f dist/nodes/VokaaiTrigger/vokaai.svg
+          echo "All expected dist artifacts present."
