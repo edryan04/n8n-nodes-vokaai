@@ -30,6 +30,12 @@ module.exports = {
       files: ['./credentials/**/*.ts'],
       plugins: ['eslint-plugin-n8n-nodes-base'],
       extends: ['plugin:n8n-nodes-base/credentials'],
+      rules: {
+        // The rule's own docs say: "Only applicable to nodes in the main
+        // repository." Its autofixer camelCases the URL VALUE, which
+        // corrupts external URLs. We are a community package, so disable.
+        'n8n-nodes-base/cred-class-field-documentation-url-miscased': 'off',
+      },
     },
     {
       files: ['./nodes/**/*.ts'],
