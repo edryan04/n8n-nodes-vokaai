@@ -10,6 +10,20 @@ import {
 import { createHmac, timingSafeEqual } from 'crypto';
 
 /**
+ * Convert the X-Voka-Timestamp header value into a millisecond UTC time.
+ * Voka currently sends 10-digit Unix SECONDS (Stripe-style); fallbacks
+ * handle 13-digit Unix ms and ISO-8601 in case the contract evolves.
+ * Returns null when the value isn't recognized.
+ */
+function parseVokaTimestamp(raw: string | undefined): number | null {
+	if (typeof raw !== 'string' || raw.length === 0) return null;
+	if (/^\d{10}$/.test(raw)) return parseInt(raw, 10) * 1000;
+	if (/^\d{13}$/.test(raw)) return parseInt(raw, 10);
+	const parsed = Date.parse(raw);
+	return Number.isNaN(parsed) ? null : parsed;
+}
+
+/**
  * VokaaiTrigger — REST Hook trigger that subscribes to Voka webhook events
  * via POST /api/v1/webhook-subscriptions and emits events into the n8n
  * workflow as they arrive.
@@ -141,21 +155,38 @@ export class VokaaiTrigger implements INodeType {
 				const body: IDataObject = { url: webhookUrl, events };
 				if (description) body.description = description;
 
-				const response = (await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'vokaaiApi',
-					{
+				const postSubscribe = async () =>
+					(await this.helpers.httpRequestWithAuthentication.call(this, 'vokaaiApi', {
 						method: 'POST',
 						url: `${credentials.baseUrl}/api/v1/webhook-subscriptions`,
 						body,
 						json: true,
-					},
-				)) as { id: string; secret: string };
+					})) as { id: string; secret?: string };
 
-				if (!response.id) {
+				let response = await postSubscribe();
+
+				// Idempotent-replay recovery: Voka returns the existing row WITHOUT
+				// `secret` when (customer_id, url, events) already matches an active
+				// subscription. Without a secret we can't HMAC-verify deliveries, so
+				// tear down + recreate to force a fresh secret. Safe because the same
+				// API key controls both sides.
+				if (response.id && !response.secret) {
+					try {
+						await this.helpers.httpRequestWithAuthentication.call(this, 'vokaaiApi', {
+							method: 'DELETE',
+							url: `${credentials.baseUrl}/api/v1/webhook-subscriptions/${response.id}`,
+							json: true,
+						});
+					} catch {
+						/* fall through — re-POST will surface any real error */
+					}
+					response = await postSubscribe();
+				}
+
+				if (!response.id || !response.secret) {
 					throw new NodeOperationError(
 						this.getNode(),
-						'Voka did not return a subscription ID. Check that your API key has the manage_webhooks scope.',
+						'Voka did not return a subscription id + secret. Check that your API key has the manage_webhooks scope.',
 					);
 				}
 
@@ -214,8 +245,19 @@ export class VokaaiTrigger implements INodeType {
 		}
 
 		// Replay protection: reject deliveries older than 5 minutes.
-		const ageSeconds = Math.abs(Date.now() / 1000 - new Date(timestamp).getTime() / 1000);
-		if (Number.isNaN(ageSeconds) || ageSeconds > 300) {
+		// Voka sends Unix SECONDS in the header (per lib/webhooks/deliver.ts
+		// on the platform); new Date(unixSecondsString) returns Invalid Date
+		// and silently breaks the age check. parseVokaTimestamp handles all
+		// three forms (seconds / ms / ISO) defensively.
+		const tsMs = parseVokaTimestamp(timestamp);
+		if (tsMs === null) {
+			throw new NodeOperationError(
+				this.getNode(),
+				`Could not parse X-Voka-Timestamp header value "${timestamp}".`,
+			);
+		}
+		const ageSeconds = Math.abs(Date.now() - tsMs) / 1000;
+		if (ageSeconds > 300) {
 			throw new NodeOperationError(
 				this.getNode(),
 				`X-Voka-Timestamp outside the 5-minute replay window (age=${ageSeconds.toFixed(0)}s).`,

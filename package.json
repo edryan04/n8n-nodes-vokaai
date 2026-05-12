@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-vokaai",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node for Voka AI — trigger workflows on call events (completed, insight received, transcript ready), pull call details and transcripts, and place outbound AI assistant calls.",
   "keywords": [
     "n8n-community-node-package",
