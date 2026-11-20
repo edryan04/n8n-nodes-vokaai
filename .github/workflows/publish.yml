@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  # Required for npm publish --provenance to mint a Sigstore attestation
+  # Required for npm trusted publishing (OIDC) and the provenance attestation
   id-token: write
   contents: read
 
@@ -24,9 +24,14 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.15'
+          node-version: '22.14'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm for trusted publishing
+        # Trusted publishing needs npm >= 11.5.1. Pinned to 11 so npm 12's
+        # install-time defaults don't change the build unannounced.
+        run: npm install -g npm@11
 
       - name: Install
         # See ci.yml — skip native compile of isolated-vm; only types needed.
@@ -39,8 +44,7 @@ jobs:
         run: npm run build
 
       - name: Publish to npm with provenance
+        # Authenticates through npm trusted publishing (OIDC): no token secret.
+        # Configured on npmjs.com > n8n-nodes-vokaai > Settings > Trusted Publisher
+        # for edryan04/n8n-nodes-vokaai, workflow publish.yml, no environment.
         run: npm publish --provenance --access public
-        env:
-          # An npm automation token with publish access; add via:
-          #   GitHub repo → Settings → Secrets and variables → Actions → New
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
