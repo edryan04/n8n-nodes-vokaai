@@ -5,6 +5,7 @@ import {
 	IWebhookResponseData,
 	INodeType,
 	INodeTypeDescription,
+	NodeConnectionTypes,
 	NodeOperationError,
 } from 'n8n-workflow';
 import { createHmac, timingSafeEqual } from 'crypto';
@@ -53,7 +54,7 @@ export class VokaaiTrigger implements INodeType {
 			name: 'Voka AI Trigger',
 		},
 		inputs: [],
-		outputs: ['main'],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'vokaaiApi',
@@ -177,8 +178,11 @@ export class VokaaiTrigger implements INodeType {
 							url: `${credentials.baseUrl}/api/v1/webhook-subscriptions/${response.id}`,
 							json: true,
 						});
-					} catch {
-						/* fall through — re-POST will surface any real error */
+					} catch (error) {
+						// Fall through — the re-POST below surfaces any real error.
+						this.logger.warn(
+							`Voka AI trigger: could not delete secretless subscription ${response.id} before re-creating it: ${(error as Error).message}`,
+						);
 					}
 					response = await postSubscribe();
 				}
@@ -210,9 +214,12 @@ export class VokaaiTrigger implements INodeType {
 						url: `${credentials.baseUrl}/api/v1/webhook-subscriptions/${subscriptionId}`,
 						json: true,
 					});
-				} catch {
+				} catch (error) {
 					// Best-effort delete: if the subscription is already gone (e.g. user
 					// removed it from the dashboard) we still want to succeed locally.
+					this.logger.warn(
+						`Voka AI trigger: could not delete webhook subscription ${subscriptionId}: ${(error as Error).message}`,
+					);
 				}
 
 				delete webhookData.subscriptionId;

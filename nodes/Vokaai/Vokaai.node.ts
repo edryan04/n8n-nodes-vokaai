@@ -1,4 +1,4 @@
-import { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import { INodeType, INodeTypeDescription, NodeConnectionTypes } from 'n8n-workflow';
 
 /**
  * Vokaai — declarative-style action node.
@@ -30,11 +30,9 @@ export class Vokaai implements INodeType {
 		defaults: {
 			name: 'Voka AI',
 		},
-		// Literal 'main' rather than NodeConnectionType enum — n8n-workflow 2.x
-		// exports NodeConnectionType as type-only, so the runtime value is the
-		// raw string. Both forms render identically in the n8n UI.
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
+		usableAsTool: true,
 		credentials: [
 			{
 				name: 'vokaaiApi',
