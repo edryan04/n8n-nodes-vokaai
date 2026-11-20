@@ -5,6 +5,17 @@ All notable changes to this project will be documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] — 2026-11-20
+
+### Changed
+- Node icons now ship light and dark variants so they read well on both n8n themes.
+- Releases publish through npm trusted publishing (OIDC) with provenance; no npm token.
+
+## [0.1.2] — 2026-11-20
+
+### Changed
+- n8n verification fixes: credential icon, `usableAsTool`, author email, trigger error logging.
+
 ## [0.1.1] — 2026-05-12
 
 ### Fixed

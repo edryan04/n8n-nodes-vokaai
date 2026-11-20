@@ -22,7 +22,7 @@ export class Vokaai implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Voka AI',
 		name: 'vokaai',
-		icon: 'file:vokaai.svg',
+		icon: { light: 'file:vokaai.svg', dark: 'file:vokaai.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
