@@ -17,6 +17,8 @@ export class VokaaiApi implements ICredentialType {
 
 	displayName = 'Voka AI API';
 
+	icon = 'file:vokaai.svg' as const;
+
 	documentationUrl = 'https://docs.vokaai.com/docs/api/authentication';
 
 	properties: INodeProperties[] = [
