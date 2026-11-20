@@ -45,7 +45,7 @@ export class VokaaiTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Voka AI Trigger',
 		name: 'vokaaiTrigger',
-		icon: 'file:vokaai.svg',
+		icon: { light: 'file:vokaai.svg', dark: 'file:vokaai.dark.svg' },
 		group: ['trigger'],
 		version: 1,
 		subtitle: '={{$parameter["events"].join(", ")}}',
